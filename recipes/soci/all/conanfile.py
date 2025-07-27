@@ -1,14 +1,13 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.55.0"
-
 
 class SociConan(ConanFile):
     name = "soci"
@@ -109,7 +108,6 @@ class SociConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-
         # MacOS @rpath
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.variables["SOCI_SHARED"] = self.options.shared
@@ -135,16 +133,18 @@ class SociConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
+        # PATCH: Remove Boost::disable_autolinking from SOCI CMakeLists.txt if present
+        replace_in_file(self,
+            os.path.join(self.source_folder, "src", "core", "CMakeLists.txt"),
+            "Boost::disable_autolinking", "")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def package(self):
         copy(self, "LICENSE_1_0.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-
         cmake = CMake(self)
         cmake.install()
-
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
