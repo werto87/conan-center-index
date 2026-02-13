@@ -56,4 +56,3 @@ class ConfuJson(ConanFile):
 
     def package_info(self):
         self.cpp_info.components[self.name].requires = ["boost::headers","magic_enum::magic_enum"]
-        self.cpp_info.components[self.name].libs = [self.name]
