@@ -29,7 +29,7 @@ class ConfuJson(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.85.0")
+        self.requires("boost/1.90.0")
         self.requires("magic_enum/0.9.6")
 
     def package_id(self):
